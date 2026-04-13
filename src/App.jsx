@@ -50,12 +50,14 @@ function mix(hex, pct) {
 function applyAccent(hex) {
   const r = document.documentElement;
   const [rv, g, b] = hexToRgb(hex);
-  // perceived luminance — pick black or white text on accent bg
   const lum = (0.299 * rv + 0.587 * g + 0.114 * b) / 255;
   const onAccent = lum > 0.55 ? "#1a1a18" : "#fafaf8";
   r.style.setProperty("--accent",       hex);
   r.style.setProperty("--seal",         hex);
   r.style.setProperty("--on-accent",    onAccent);
+  r.style.setProperty("--bg",           mix(hex, 0.94));
+  r.style.setProperty("--surface",      mix(hex, 0.88));
+  r.style.setProperty("--surface-2",    mix(hex, 0.82));
   r.style.setProperty("--accent-soft",  mix(hex, 0.88));
   r.style.setProperty("--border",       mix(hex, 0.55));
   r.style.setProperty("--border-soft",  mix(hex, 0.72));
