@@ -49,8 +49,13 @@ function mix(hex, pct) {
 
 function applyAccent(hex) {
   const r = document.documentElement;
+  const [rv, g, b] = hexToRgb(hex);
+  // perceived luminance — pick black or white text on accent bg
+  const lum = (0.299 * rv + 0.587 * g + 0.114 * b) / 255;
+  const onAccent = lum > 0.55 ? "#1a1a18" : "#fafaf8";
   r.style.setProperty("--accent",       hex);
   r.style.setProperty("--seal",         hex);
+  r.style.setProperty("--on-accent",    onAccent);
   r.style.setProperty("--accent-soft",  mix(hex, 0.88));
   r.style.setProperty("--border",       mix(hex, 0.55));
   r.style.setProperty("--border-soft",  mix(hex, 0.72));
@@ -192,7 +197,7 @@ function ClosureMode({ message, onComplete, onCancel }) {
     label:   { fontSize:11, textTransform:"uppercase", letterSpacing:"0.12em", color:"var(--muted)" },
     prompt:  { fontSize:17, lineHeight:1.8, color:"var(--text)", fontStyle:"italic" },
     ta:      { width:"100%", background:"var(--surface)", border:"1px solid var(--border-soft)", borderRadius:12, padding:"14px 16px", fontSize:14, lineHeight:1.9, color:"var(--text)", resize:"vertical", minHeight:100 },
-    btn:     (primary) => ({ padding:"10px 22px", fontSize:13, borderRadius:10, border:"1px solid", cursor:"pointer", background: primary ? "var(--seal)" : "none", color: primary ? "var(--bg)" : "var(--muted)", borderColor: primary ? "var(--seal)" : "var(--border-soft)" }),
+    btn:     (primary) => ({ padding:"10px 22px", fontSize:13, borderRadius:10, border:"1px solid", cursor:"pointer", background: primary ? "var(--seal)" : "none", color: primary ? "var(--on-accent)" : "var(--muted)", borderColor: primary ? "var(--seal)" : "var(--border-soft)" }),
     row:     { display:"flex", justifyContent:"space-between", alignItems:"center", gap:12 },
   };
 
@@ -537,7 +542,7 @@ export default function App() {
     filterBtn: (active) => ({
       padding:"5px 14px", fontSize:12, borderRadius:20, border:"1px solid", cursor:"pointer",
       background: active ? "var(--seal)" : "none",
-      color:      active ? "var(--bg)"   : "var(--muted)",
+      color:      active ? "var(--on-accent)"   : "var(--muted)",
       borderColor: active ? "var(--seal)" : "var(--border-soft)",
     }),
     select: { background:"var(--surface)", border:"1px solid var(--border-soft)", borderRadius:10, padding:"5px 10px", fontSize:12, color:"var(--text-dim)", cursor:"pointer" },
@@ -612,7 +617,7 @@ export default function App() {
                 <button key={r.key} onClick={() => setRecipient(r.key)} style={{
                   padding:"8px 18px", fontSize:13, borderRadius:10, border:"1px solid", cursor:"pointer",
                   background:   recipient === r.key ? "var(--seal)"        : "none",
-                  color:        recipient === r.key ? "var(--bg)"          : "var(--muted)",
+                  color:        recipient === r.key ? "var(--on-accent)"          : "var(--muted)",
                   borderColor:  recipient === r.key ? "var(--seal)"        : "var(--border-soft)",
                 }}>
                   {r.label}
@@ -643,7 +648,7 @@ export default function App() {
             <button onClick={submit} disabled={!canSubmit} style={{
               padding:"10px 24px", fontSize:13, fontWeight:500, borderRadius:10, border:"1px solid", cursor: canSubmit ? "pointer" : "not-allowed",
               background:  canSubmit ? "var(--seal)"   : "none",
-              color:       canSubmit ? "var(--bg)"     : "var(--muted)",
+              color:       canSubmit ? "var(--on-accent)"     : "var(--muted)",
               borderColor: canSubmit ? "var(--seal)"   : "var(--border-soft)",
               display:"flex", alignItems:"center", gap:8,
             }}>
