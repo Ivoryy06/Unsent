@@ -1,0 +1,36 @@
+:root {
+  /* Late-night letter drawer — dark, quiet, unhurried */
+  --bg:           #0f0d0e;
+  --surface:      #161214;
+  --surface-2:    #1c1820;
+  --border:       #2a2228;
+  --border-soft:  #221e24;
+  --text:         #d4c8cc;
+  --text-dim:     #7a6e72;
+  --muted:        #4a4248;
+  --accent:       #8a7a8e;
+  --accent-soft:  #1e1a22;
+  --resolved:     #2a2830;   /* sealed / muted */
+  --resolved-text:#5a5460;
+  --seal:         #3a3440;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+textarea, input, button, select { font-family: inherit; }
+
+textarea:focus, input:focus { outline: 1px solid var(--accent); outline-offset: 1px; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
