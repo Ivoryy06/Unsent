@@ -8,7 +8,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 
 const API_BASE    = import.meta.env.VITE_API_BASE ?? "";
 const IS_WEB_MODE = !API_BASE || import.meta.env.VITE_WEB_MODE === "true";
-const GEMINI_MODEL = "gemini-2.0-flash";
+const GROQ_MODEL = "llama3-8b-8192";
+
 
 const EMOTIONS = ["joy","sadness","anger","fear","disgust","surprise","anxiety","love","grief","hope","shame","pride","longing","regret","neutral"];
 
@@ -107,25 +108,21 @@ async function idbClear() {
   });
 }
 
-// ── Gemini (web mode — emotion tagging only) ──────────────────────────────────
-
-async function callGemini(apiKey, prompt) {
-  const url  = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
-  const resp = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
-  });
-  if (!resp.ok) throw new Error(`Gemini ${resp.status}`);
-  const data = await resp.json();
-  return data.candidates[0].content.parts[0].text.trim();
-}
+// ── Groq (web mode — emotion tagging only) ───────────────────────────────────
 
 async function tagEmotion(apiKey, body) {
-  const result = await callGemini(apiKey,
-    `Identify the single dominant emotion in this unsent message. Choose exactly one from: ${EMOTIONS.join(", ")}. Reply with only the emotion word.\n\n${body}`
-  );
-  const e = result.toLowerCase().trim();
+  const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages: [{ role: "user", content: `Identify the single dominant emotion in this unsent message. Choose exactly one from: ${EMOTIONS.join(", ")}. Reply with only the emotion word.\n\n${body}` }],
+      max_tokens: 10,
+    }),
+  });
+  if (!resp.ok) throw new Error(`Groq ${resp.status}`);
+  const data = await resp.json();
+  const e = data.choices[0].message.content.trim().toLowerCase();
   return EMOTIONS.includes(e) ? e : "neutral";
 }
 
@@ -395,7 +392,7 @@ export default function App() {
   const [messages,     setMessages]     = useState(() => lsGet("unsent_messages", []));
   const [loading,      setLoading]      = useState(false);
   const [toast,        setToast]        = useState(null);
-  const [apiKey,       setApiKey]       = useState(() => localStorage.getItem("unsent_gemini_key") || "");
+  const [apiKey,       setApiKey]       = useState(() => localStorage.getItem("unsent_groq_key") || "");
   const [showKey,      setShowKey]      = useState(false);
   const [accentHex,    setAccentHex]    = useState(() => localStorage.getItem("unsent_accent") || "");
 
@@ -591,10 +588,10 @@ export default function App() {
       {/* API key input (web mode) */}
       {webMode && showKey && (
         <div style={{ marginBottom:"1.5rem", padding:"12px 16px", background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8 }}>
-          <label style={{ fontSize:11, color:"var(--muted)", display:"block", marginBottom:6 }}>Gemini API Key — stored in this browser only, never sent anywhere else</label>
+          <label style={{ fontSize:11, color:"var(--muted)", display:"block", marginBottom:6 }}>Groq API Key — stored in this browser only, never sent anywhere else</label>
           <input type="password" value={apiKey}
-            onChange={e => { setApiKey(e.target.value); localStorage.setItem("unsent_gemini_key", e.target.value); }}
-            placeholder="AIza…"
+            onChange={e => { setApiKey(e.target.value); localStorage.setItem("unsent_groq_key", e.target.value); }}
+            placeholder="gsk_…"
             style={{ width:"100%", padding:"8px 10px", fontSize:13, border:"1px solid var(--border)", borderRadius:6, fontFamily:"monospace", background:"var(--bg)", color:"var(--text)", boxSizing:"border-box" }}
           />
         </div>
