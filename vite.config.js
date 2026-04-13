@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  base: process.env.GITHUB_PAGES ? "/Unsent/" : "/",
+  base: "/Unsent/",
   server: {
     proxy: { "/api": "http://localhost:5051" },
   },
