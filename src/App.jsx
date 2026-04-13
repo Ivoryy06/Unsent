@@ -34,6 +34,30 @@ const CLOSURE_PROMPTS = [
   "Is there anything you'd want to say now, just for yourself?",
 ];
 
+// ── Color theme ──────────────────────────────────────────────────────────────
+
+function hexToRgb(hex) {
+  const n = parseInt(hex.replace("#", ""), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function mix(hex, pct) {
+  const [r, g, b] = hexToRgb(hex);
+  const m = (c) => Math.round(c + (255 - c) * pct).toString(16).padStart(2, "0");
+  return `#${m(r)}${m(g)}${m(b)}`;
+}
+
+function applyAccent(hex) {
+  const r = document.documentElement;
+  r.style.setProperty("--accent",       hex);
+  r.style.setProperty("--seal",         hex);
+  r.style.setProperty("--accent-soft",  mix(hex, 0.88));
+  r.style.setProperty("--border",       mix(hex, 0.55));
+  r.style.setProperty("--border-soft",  mix(hex, 0.72));
+  r.style.setProperty("--resolved",     mix(hex, 0.82));
+  r.style.setProperty("--resolved-text",mix(hex, 0.35));
+}
+
 // ── IndexedDB (offline cache) ─────────────────────────────────────────────────
 
 const IDB_NAME  = "unsent_offline";
@@ -365,6 +389,9 @@ export default function App() {
   const [toast,        setToast]        = useState(null);
   const [apiKey,       setApiKey]       = useState(() => localStorage.getItem("unsent_gemini_key") || "");
   const [showKey,      setShowKey]      = useState(false);
+  const [accentHex,    setAccentHex]    = useState(() => localStorage.getItem("unsent_accent") || "");
+
+  useEffect(() => { if (accentHex) applyAccent(accentHex); }, []);
   const [isOnline,     setIsOnline]     = useState(navigator.onLine);
   const [backendOk,    setBackendOk]    = useState(null);
   const [pendingCount, setPendingCount] = useState(0);
@@ -538,6 +565,18 @@ export default function App() {
               {apiKey ? "key set" : "API key"}
             </button>
           )}
+          <input
+            type="color"
+            title="Accent color"
+            value={accentHex || "#111111"}
+            onChange={e => {
+              const hex = e.target.value;
+              setAccentHex(hex);
+              localStorage.setItem("unsent_accent", hex);
+              applyAccent(hex);
+            }}
+            style={{ width:28, height:28, padding:2, border:"1px solid var(--border-soft)", borderRadius:6, cursor:"pointer", background:"var(--surface)" }}
+          />
         </div>
       </div>
 
