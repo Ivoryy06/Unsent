@@ -143,7 +143,7 @@ const EmotionDot = ({ emotion, size=8 }) => (
 const Toast = ({ msg, onDone }) => {
   useEffect(() => { const t = setTimeout(onDone, 3000); return () => clearTimeout(t); }, [onDone]);
   return (
-    <div style={{ position:"fixed", bottom:24, left:"50%", transform:"translateX(-50%)", background:"var(--surface-2)", border:"1px solid var(--border)", borderRadius:6, padding:"9px 18px", fontSize:12, color:"var(--text-dim)", zIndex:999 }}>
+    <div style={{ position:"fixed", bottom:28, left:"50%", transform:"translateX(-50%)", background:"var(--bg)", border:"1px solid var(--border-soft)", borderRadius:14, padding:"10px 20px", fontSize:12, color:"var(--text-dim)", zIndex:999, boxShadow:"0 4px 20px rgba(0,0,0,0.08)" }}>
       {msg}
     </div>
   );
@@ -187,12 +187,12 @@ function ClosureMode({ message, onComplete, onCancel }) {
   }
 
   const s = {
-    overlay: { position:"fixed", inset:0, background:"rgba(0,0,0,0.82)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:"1.5rem", animation:"fadeIn 0.25s ease" },
-    box:     { background:"var(--surface)", border:"1px solid var(--border)", borderRadius:12, padding:"2rem", maxWidth:520, width:"100%", display:"flex", flexDirection:"column", gap:"1.5rem" },
-    label:   { fontSize:11, textTransform:"uppercase", letterSpacing:"0.1em", color:"var(--muted)" },
-    prompt:  { fontSize:17, lineHeight:1.7, color:"var(--text)", fontStyle:"italic" },
-    ta:      { width:"100%", background:"var(--surface-2)", border:"1px solid var(--border)", borderRadius:8, padding:"12px 14px", fontSize:14, lineHeight:1.8, color:"var(--text)", resize:"vertical", minHeight:100 },
-    btn:     (primary) => ({ padding:"9px 20px", fontSize:13, borderRadius:6, border:"1px solid", cursor:"pointer", background: primary ? "var(--seal)" : "none", color: primary ? "var(--text)" : "var(--muted)", borderColor: primary ? "var(--border)" : "var(--border-soft)" }),
+    overlay: { position:"fixed", inset:0, background:"rgba(0,0,0,0.55)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:"1.5rem", animation:"fadeIn 0.25s ease", backdropFilter:"blur(4px)" },
+    box:     { background:"var(--bg)", border:"1px solid var(--border-soft)", borderRadius:20, padding:"2.25rem", maxWidth:520, width:"100%", display:"flex", flexDirection:"column", gap:"1.75rem", boxShadow:"0 8px 40px rgba(0,0,0,0.10)" },
+    label:   { fontSize:11, textTransform:"uppercase", letterSpacing:"0.12em", color:"var(--muted)" },
+    prompt:  { fontSize:17, lineHeight:1.8, color:"var(--text)", fontStyle:"italic" },
+    ta:      { width:"100%", background:"var(--surface)", border:"1px solid var(--border-soft)", borderRadius:12, padding:"14px 16px", fontSize:14, lineHeight:1.9, color:"var(--text)", resize:"vertical", minHeight:100 },
+    btn:     (primary) => ({ padding:"10px 22px", fontSize:13, borderRadius:10, border:"1px solid", cursor:"pointer", background: primary ? "var(--seal)" : "none", color: primary ? "var(--bg)" : "var(--muted)", borderColor: primary ? "var(--seal)" : "var(--border-soft)" }),
     row:     { display:"flex", justifyContent:"space-between", alignItems:"center", gap:12 },
   };
 
@@ -298,13 +298,14 @@ function MessageCard({ message, onDelete, onResolved }) {
 
   const cardStyle = {
     background:   resolved ? "var(--resolved)"  : "var(--surface)",
-    border:       `1px solid ${resolved ? "var(--border-soft)" : "var(--border)"}`,
-    borderRadius: 10,
-    padding:      "14px 16px",
-    marginBottom: 8,
-    opacity:      resolved ? 0.72 : 1,
+    border:       `1px solid ${resolved ? "var(--border-soft)" : "var(--border-soft)"}`,
+    borderRadius: 16,
+    padding:      "18px 20px",
+    marginBottom: 10,
+    opacity:      resolved ? 0.75 : 1,
     transition:   "opacity 0.3s",
     animation:    "fadeIn 0.2s ease",
+    boxShadow:    resolved ? "none" : "0 1px 4px rgba(0,0,0,0.04)",
   };
 
   return (
@@ -527,19 +528,19 @@ export default function App() {
 
   const s = {
     tab: (id) => ({
-      padding:"8px 16px", fontSize:13, border:"none", cursor:"pointer", borderBottom:"2px solid",
+      padding:"9px 18px", fontSize:13, border:"none", cursor:"pointer", borderBottom:"2px solid",
       background:"none", fontFamily:"inherit",
       color:       tab===id ? "var(--text)"   : "var(--muted)",
       borderColor: tab===id ? "var(--accent)" : "transparent",
       fontWeight:  tab===id ? 500 : 400,
     }),
     filterBtn: (active) => ({
-      padding:"4px 12px", fontSize:12, borderRadius:20, border:"1px solid", cursor:"pointer",
+      padding:"5px 14px", fontSize:12, borderRadius:20, border:"1px solid", cursor:"pointer",
       background: active ? "var(--seal)" : "none",
-      color:      active ? "var(--text)" : "var(--muted)",
-      borderColor: active ? "var(--border)" : "var(--border-soft)",
+      color:      active ? "var(--bg)"   : "var(--muted)",
+      borderColor: active ? "var(--seal)" : "var(--border-soft)",
     }),
-    select: { background:"var(--surface-2)", border:"1px solid var(--border-soft)", borderRadius:6, padding:"4px 8px", fontSize:12, color:"var(--text-dim)", cursor:"pointer" },
+    select: { background:"var(--surface)", border:"1px solid var(--border-soft)", borderRadius:10, padding:"5px 10px", fontSize:12, color:"var(--text-dim)", cursor:"pointer" },
   };
 
   return (
@@ -609,10 +610,10 @@ export default function App() {
             <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
               {RECIPIENTS.map(r => (
                 <button key={r.key} onClick={() => setRecipient(r.key)} style={{
-                  padding:"7px 16px", fontSize:13, borderRadius:6, border:"1px solid", cursor:"pointer",
+                  padding:"8px 18px", fontSize:13, borderRadius:10, border:"1px solid", cursor:"pointer",
                   background:   recipient === r.key ? "var(--seal)"        : "none",
-                  color:        recipient === r.key ? "var(--text)"        : "var(--muted)",
-                  borderColor:  recipient === r.key ? "var(--border)"      : "var(--border-soft)",
+                  color:        recipient === r.key ? "var(--bg)"          : "var(--muted)",
+                  borderColor:  recipient === r.key ? "var(--seal)"        : "var(--border-soft)",
                 }}>
                   {r.label}
                 </button>
@@ -634,16 +635,16 @@ export default function App() {
             onChange={e => setBody(e.target.value)}
             placeholder="Write what you couldn't say…"
             rows={9}
-            style={{ width:"100%", padding:"16px", fontSize:15, lineHeight:1.9, border:"1px solid var(--border)", borderRadius:10, fontFamily:"'Lora', Georgia, serif", color:"var(--text)", background:"var(--surface)", resize:"vertical", boxSizing:"border-box" }}
+            style={{ width:"100%", padding:"18px", fontSize:15, lineHeight:1.9, border:"1px solid var(--border-soft)", borderRadius:16, fontFamily:"'Lora', Georgia, serif", color:"var(--text)", background:"var(--surface)", resize:"vertical", boxSizing:"border-box" }}
           />
 
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
             <span style={{ fontSize:12, color:"var(--muted)" }}>{body.trim().split(/\s+/).filter(Boolean).length} words</span>
             <button onClick={submit} disabled={!canSubmit} style={{
-              padding:"9px 22px", fontSize:13, fontWeight:500, borderRadius:7, border:"1px solid", cursor: canSubmit ? "pointer" : "not-allowed",
-              background:  canSubmit ? "var(--seal)"        : "none",
-              color:       canSubmit ? "var(--text)"        : "var(--muted)",
-              borderColor: canSubmit ? "var(--border)"      : "var(--border-soft)",
+              padding:"10px 24px", fontSize:13, fontWeight:500, borderRadius:10, border:"1px solid", cursor: canSubmit ? "pointer" : "not-allowed",
+              background:  canSubmit ? "var(--seal)"   : "none",
+              color:       canSubmit ? "var(--bg)"     : "var(--muted)",
+              borderColor: canSubmit ? "var(--seal)"   : "var(--border-soft)",
               display:"flex", alignItems:"center", gap:8,
             }}>
               {loading ? <><Spinner/> Saving…</> : "Keep this"}
