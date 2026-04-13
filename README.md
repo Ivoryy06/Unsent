@@ -12,7 +12,7 @@ Some things go unsaid not because they don't matter, but because sending them wo
 
 You write a message. You tag it with a recipient — a person, a moment, yourself. It gets stored. That's it. The timeline is a quiet, chronological drawer of everything you've kept. You can filter by emotion, by recipient, by whether something has been resolved or is still open.
 
-Emotion tagging happens silently in the background via Gemini and is used only for filtering. It is never shown as feedback, never reflected back at you.
+Emotion tagging happens silently in the background via Groq and is used only for filtering. It is never shown as feedback, never reflected back at you.
 
 ## Closure Mode
 
@@ -30,7 +30,7 @@ It walks you through five quiet prompts:
 
 You can skip any of them. There are no right answers.
 
-At the end, the message doesn't disappear. It gets **sealed** — visually muted, moved to a resolved archive that's still fully readable. Your responses to the prompts are stored alongside it and can be read back at any time. The transformation is the point, not the erasure. The message goes from something unfinished and heavy to something acknowledged and set down.
+At the end, the message doesn't disappear. It gets **sealed** — visually muted, moved to a resolved archive that's still fully readable. Your responses to the prompts are stored alongside it and can be read back at any time.
 
 ## Project structure
 
@@ -42,7 +42,7 @@ Unsent/
 │   └── requirements.txt
 ├── src/
 │   ├── App.jsx           # React app — Write, Timeline, Closure Mode
-│   ├── index.css         # Dark palette, no light mode
+│   ├── index.css
 │   └── main.jsx
 ├── index.html
 ├── package.json
@@ -57,9 +57,7 @@ Unsent/
 | Frontend | React 18 + Vite |
 | Backend | Flask + SQLite (WAL) |
 | Offline cache | IndexedDB |
-| Emotion tagging | Gemini 2.0 Flash — server-side in local mode, direct from browser in web mode |
-
-Same dual local/web mode and offline-first pattern as [Echo](https://github.com/Ivoryy06/Echo).
+| Emotion tagging | Groq (Llama 3) — server-side in local mode, direct from browser in web mode |
 
 ## Running locally
 
@@ -68,7 +66,7 @@ Same dual local/web mode and offline-first pattern as [Echo](https://github.com/
 cd server
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-echo "GEMINI_API_KEY=your_key_here" > .env
+echo "GROQ_API_KEY=your_key_here" > .env
 python app.py
 # → http://localhost:5051
 
@@ -80,11 +78,9 @@ npm run dev
 # → http://localhost:5173
 ```
 
-The SQLite database is created automatically at `server/unsent.db` on first run.
-
 ## Web mode (no backend)
 
-Leave `VITE_API_BASE` empty in `.env`. Open the app, click **API key**, and enter your Gemini key. Everything stores in `localStorage` and `IndexedDB` in your browser. Nothing leaves your machine except the Gemini tagging call.
+Leave `VITE_API_BASE` empty. Open the app, click **API key**, and enter your Groq key (`gsk_...`). Get one free at [console.groq.com](https://console.groq.com). Everything stores in `localStorage` and `IndexedDB` in your browser.
 
 ## API
 
@@ -94,14 +90,9 @@ Leave `VITE_API_BASE` empty in `.env`. Open the app, click **API key**, and ente
 | GET | `/api/messages` | List messages (`?resolved=0/1`, `?emotion=`, `?recipient=`) |
 | POST | `/api/messages` | Create a message |
 | DELETE | `/api/messages/:id` | Delete a message |
-| GET | `/api/messages/:id/closure/prompts` | Get the five closure prompts |
 | POST | `/api/messages/:id/closure` | Save closure responses + mark resolved |
 | GET | `/api/messages/:id/closure` | Read back closure responses |
 | POST | `/api/sync` | Sync offline-cached messages |
-
-## Privacy
-
-Everything is local-only. No accounts, no external sync, no analytics. The Gemini API key is read from your local `.env` in local mode and stored only in `localStorage` in web mode — it is never sent to any server other than Google's API directly.
 
 ## License
 
