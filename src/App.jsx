@@ -137,29 +137,22 @@ function lsSet(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 // ── Tiny shared components ────────────────────────────────────────────────────
 
 const Spinner = () => (
-  <span style={{ display:"inline-block", width:14, height:14, border:"1.5px solid var(--accent)", borderTopColor:"transparent", borderRadius:"50%", animation:"spin 0.7s linear infinite", verticalAlign:"middle" }}/>
+  <span style={{ display:"inline-block", width:14, height:14, border:"2px solid rgba(13,13,15,0.3)", borderTopColor:"#0d0d0f", borderRadius:"50%", animation:"spin 0.7s linear infinite", verticalAlign:"middle" }}/>
 );
 
 const EmotionDot = ({ emotion, size=8 }) => (
-  <span style={{ display:"inline-block", width:size, height:size, borderRadius:"50%", background: EMOTION_COLOR[emotion] ?? "#5a5258", flexShrink:0 }} title={emotion}/>
+  <span style={{ display:"inline-block", width:size, height:size, borderRadius:"50%", background: EMOTION_COLOR[emotion] ?? "#4a4a5a", flexShrink:0 }} title={emotion}/>
 );
 
 const Toast = ({ msg, onDone }) => {
   useEffect(() => { const t = setTimeout(onDone, 3000); return () => clearTimeout(t); }, [onDone]);
-  return (
-    <div style={{ position:"fixed", bottom:28, left:"50%", transform:"translateX(-50%)", background:"var(--bg)", border:"1px solid var(--border-soft)", borderRadius:14, padding:"10px 20px", fontSize:12, color:"var(--text-dim)", zIndex:999, boxShadow:"0 4px 20px rgba(0,0,0,0.08)" }}>
-      {msg}
-    </div>
-  );
+  return <div className="toast">{msg}</div>;
 };
 
 // ── Closure Mode ──────────────────────────────────────────────────────────────
-// Entirely user-initiated. The app never suggests, reminds, or nudges.
-// A short guided flow of quiet prompts. At the end the message is sealed,
-// not deleted — it moves to the resolved archive, still fully readable.
 
 function ClosureMode({ message, onComplete, onCancel }) {
-  const [step,      setStep]      = useState(0);   // 0 = intro, 1–5 = prompts, 6 = done
+  const [step,      setStep]      = useState(0);
   const [responses, setResponses] = useState(Array(CLOSURE_PROMPTS.length).fill(""));
   const [saving,    setSaving]    = useState(false);
   const taRef = useRef(null);
@@ -190,65 +183,51 @@ function ClosureMode({ message, onComplete, onCancel }) {
     }
   }
 
-  const s = {
-    overlay: { position:"fixed", inset:0, background:"rgba(0,0,0,0.55)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:"1.5rem", animation:"fadeIn 0.25s ease", backdropFilter:"blur(4px)" },
-    box:     { background:"var(--bg)", border:"1px solid var(--border-soft)", borderRadius:20, padding:"2.25rem", maxWidth:520, width:"100%", display:"flex", flexDirection:"column", gap:"1.75rem", boxShadow:"0 8px 40px rgba(0,0,0,0.10)" },
-    label:   { fontSize:11, textTransform:"uppercase", letterSpacing:"0.12em", color:"var(--muted)" },
-    prompt:  { fontSize:17, lineHeight:1.8, color:"var(--text)", fontStyle:"italic" },
-    ta:      { width:"100%", background:"var(--surface)", border:"1px solid var(--border-soft)", borderRadius:12, padding:"14px 16px", fontSize:14, lineHeight:1.9, color:"var(--text)", resize:"vertical", minHeight:100 },
-    btn:     (primary) => ({ padding:"10px 22px", fontSize:13, borderRadius:10, border:"1px solid", cursor:"pointer", background: primary ? "var(--seal)" : "none", color: primary ? "var(--on-accent)" : "var(--muted)", borderColor: primary ? "var(--seal)" : "var(--border-soft)" }),
-    row:     { display:"flex", justifyContent:"space-between", alignItems:"center", gap:12 },
-  };
-
-  // Intro screen
   if (step === 0) return (
-    <div style={s.overlay}>
-      <div style={s.box}>
+    <div className="closure-overlay">
+      <div className="closure-box">
         <div>
-          <div style={s.label}>Closure Mode</div>
+          <div className="closure-step-label">Closure Mode</div>
           <p style={{ marginTop:10, fontSize:14, lineHeight:1.9, color:"var(--text-dim)" }}>
-            This is a short, quiet conversation — just for you. A few gentle questions about this message. There are no right answers. You can skip any prompt you're not ready for.
+            A short, quiet conversation — just for you. A few gentle questions about this message. No right answers. Skip anything you're not ready for.
           </p>
           <p style={{ marginTop:10, fontSize:14, lineHeight:1.9, color:"var(--text-dim)" }}>
             At the end, the message won't disappear. It will be sealed — still here, still yours, but set down.
           </p>
         </div>
-        <div style={s.row}>
-          <button style={s.btn(false)} onClick={onCancel}>Not yet</button>
-          <button style={s.btn(true)}  onClick={() => setStep(1)}>Begin</button>
+        <div className="closure-row">
+          <button className="closure-btn" onClick={onCancel}>Not yet</button>
+          <button className="closure-btn primary" onClick={() => setStep(1)}>Begin</button>
         </div>
       </div>
     </div>
   );
 
-  // Prompt steps
   if (isPrompt) return (
-    <div style={s.overlay}>
-      <div style={s.box}>
+    <div className="closure-overlay">
+      <div className="closure-box">
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-          <span style={s.label}>{step} / {totalSteps}</span>
-          <div style={{ display:"flex", gap:4 }}>
+          <span className="closure-step-label">{step} / {totalSteps}</span>
+          <div className="closure-dots">
             {CLOSURE_PROMPTS.map((_, i) => (
-              <span key={i} style={{ width:6, height:6, borderRadius:"50%", background: i < step ? "var(--accent)" : "var(--border)", display:"inline-block" }}/>
+              <span key={i} className={`closure-dot ${i < step ? "done" : ""}`}/>
             ))}
           </div>
         </div>
-        <p style={s.prompt}>{CLOSURE_PROMPTS[promptIdx]}</p>
+        <p className="closure-prompt">{CLOSURE_PROMPTS[promptIdx]}</p>
         <textarea
           ref={taRef}
-          style={s.ta}
+          className="closure-textarea"
           value={responses[promptIdx]}
           onChange={e => updateResponse(e.target.value)}
           placeholder="Write as little or as much as you need…"
           rows={4}
         />
-        <div style={s.row}>
-          <button style={s.btn(false)} onClick={() => setStep(prev => prev - 1)}>Back</button>
+        <div className="closure-row">
+          <button className="closure-btn" onClick={() => setStep(p => p - 1)}>Back</button>
           <div style={{ display:"flex", gap:8 }}>
-            <button style={s.btn(false)} onClick={() => step < totalSteps ? setStep(prev => prev + 1) : finish()}>
-              Skip
-            </button>
-            <button style={s.btn(true)} onClick={() => step < totalSteps ? setStep(prev => prev + 1) : finish()}>
+            <button className="closure-btn" onClick={() => step < totalSteps ? setStep(p => p + 1) : finish()}>Skip</button>
+            <button className="closure-btn primary" onClick={() => step < totalSteps ? setStep(p => p + 1) : finish()}>
               {step < totalSteps ? "Next" : (saving ? <Spinner/> : "Seal this message")}
             </button>
           </div>
@@ -257,16 +236,15 @@ function ClosureMode({ message, onComplete, onCancel }) {
     </div>
   );
 
-  // Done — this screen is never shown; onComplete fires immediately after finish()
   return null;
 }
 
 // ── Message Card ──────────────────────────────────────────────────────────────
 
 function MessageCard({ message, onDelete, onResolved }) {
-  const [expanded,    setExpanded]    = useState(false);
-  const [inClosure,   setInClosure]   = useState(false);
-  const [closureData, setClosureData] = useState(null); // loaded on expand if resolved
+  const [expanded,       setExpanded]       = useState(false);
+  const [inClosure,      setInClosure]      = useState(false);
+  const [closureData,    setClosureData]    = useState(null);
   const [loadingClosure, setLoadingClosure] = useState(false);
 
   const resolved = !!message.resolved;
@@ -295,81 +273,45 @@ function MessageCard({ message, onDelete, onResolved }) {
     }
   }
 
-  function handleClosureComplete(responses) {
-    setInClosure(false);
-    onResolved(message.id, responses);
-  }
-
-  const cardStyle = {
-    background:   resolved ? "var(--resolved)"  : "var(--surface)",
-    border:       `1px solid ${resolved ? "var(--border-soft)" : "var(--border-soft)"}`,
-    borderRadius: 16,
-    padding:      "18px 20px",
-    marginBottom: 10,
-    opacity:      resolved ? 0.75 : 1,
-    transition:   "opacity 0.3s",
-    animation:    "fadeIn 0.2s ease",
-    boxShadow:    resolved ? "none" : "0 1px 4px rgba(0,0,0,0.04)",
-  };
-
   return (
     <>
       {inClosure && (
         <ClosureMode
           message={message}
-          onComplete={handleClosureComplete}
+          onComplete={(responses) => { setInClosure(false); onResolved(message.id, responses); }}
           onCancel={() => setInClosure(false)}
         />
       )}
-      <div style={cardStyle}>
-        {/* Header row */}
-        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
-          <EmotionDot emotion={message.emotion} size={8}/>
-          <span style={{ fontSize:12, color: resolved ? "var(--resolved-text)" : "var(--text-dim)", flex:1 }}>
-            {recipientLabel} · {date}
-          </span>
-          {resolved && (
-            <span style={{ fontSize:10, letterSpacing:"0.08em", textTransform:"uppercase", color:"var(--muted)", padding:"2px 7px", border:"1px solid var(--border-soft)", borderRadius:20 }}>
-              sealed
-            </span>
-          )}
-          <button
-            onClick={() => onDelete(message.id)}
-            style={{ background:"none", border:"none", cursor:"pointer", color:"var(--muted)", fontSize:13, padding:2, lineHeight:1 }}
-            title="Delete"
-          >✕</button>
+      <div className={`message-card ${resolved ? "resolved" : ""}`}>
+        <div className="message-meta">
+          <EmotionDot emotion={message.emotion}/>
+          <span className="message-to">{recipientLabel} · {date}</span>
+          {resolved && <span className="sealed-tag">sealed</span>}
+          <button className="delete-btn" onClick={() => onDelete(message.id)} title="Delete">✕</button>
         </div>
 
-        {/* Body */}
-        <p style={{ fontSize:14, lineHeight:1.85, color: resolved ? "var(--resolved-text)" : "var(--text)", margin:0, whiteSpace:"pre-wrap", fontFamily:"'Lora', Georgia, serif" }}>
-          {message.body}
-        </p>
+        <p className="message-body">{message.body}</p>
 
-        {/* Footer actions */}
-        <div style={{ display:"flex", alignItems:"center", gap:12, marginTop:10 }}>
+        <div className="message-actions">
           {resolved && (
-            <button onClick={toggleExpand} style={{ background:"none", border:"none", cursor:"pointer", fontSize:12, color:"var(--muted)", padding:0 }}>
+            <button className="action-btn" onClick={toggleExpand}>
               {expanded ? "▲ hide" : "▼ what you wrote"}
             </button>
           )}
           {!resolved && (
-            <button
-              onClick={() => setInClosure(true)}
-              style={{ background:"none", border:"none", cursor:"pointer", fontSize:12, color:"var(--muted)", padding:0 }}
-            >
+            <button className="action-btn" onClick={() => setInClosure(true)}>
               begin closure
             </button>
           )}
         </div>
 
-        {/* Closure responses (resolved messages, expanded) */}
         {expanded && resolved && (
-          <div style={{ marginTop:12, borderTop:"1px solid var(--border-soft)", paddingTop:12, display:"flex", flexDirection:"column", gap:12 }}>
+          <div className="closure-responses">
             {loadingClosure && <span style={{ fontSize:12, color:"var(--muted)" }}><Spinner/></span>}
             {closureData && closureData.map((item, i) => (
               <div key={i}>
-                <div style={{ fontSize:11, color:"var(--muted)", marginBottom:3, fontStyle:"italic" }}>{item.prompt}</div>
-                <p style={{ fontSize:13, lineHeight:1.8, color:"var(--resolved-text)", whiteSpace:"pre-wrap" }}>{item.response}</p>
+                <div className="closure-prompt-label">{item.prompt}</div>
+                <p className="closure-response-text">{item.response}</p>
               </div>
             ))}
             {!loadingClosure && !closureData && (
@@ -548,160 +490,121 @@ export default function App() {
   };
 
   return (
-    <div style={{ fontFamily:"system-ui, -apple-system, sans-serif", maxWidth:640, margin:"0 auto", padding:"2.5rem 1.25rem", minHeight:"100vh" }}>
-
-      {/* Header */}
-      <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:"2.5rem" }}>
-        <div>
-          <h1 style={{ fontSize:22, fontWeight:600, margin:0, color:"var(--text)", letterSpacing:"-0.2px" }}>Unsent</h1>
-          <p style={{ fontSize:12, color:"var(--muted)", margin:"3px 0 0", fontStyle:"italic" }}>hold the feeling until you're ready to let go</p>
+    <>
+      {/* ── Topbar ── */}
+      <header className="topbar">
+        <div className="topbar-brand">
+          <h1>Unsent</h1>
+          <span>hold the feeling until you're ready to let go</span>
         </div>
-        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+
+        <nav className="topbar-nav">
+          {[["write","Write"],["timeline","Timeline"]].map(([id, label]) => (
+            <button key={id} className={`topbar-btn ${tab===id?"active":""}`} onClick={() => setTab(id)}>{label}</button>
+          ))}
+        </nav>
+
+        <div className="topbar-right">
           {pendingCount > 0 && (
-            <span style={{ fontSize:11, padding:"3px 8px", borderRadius:20, background:"var(--surface-2)", color:"var(--text-dim)", border:"1px solid var(--border-soft)" }}>
+            <span style={{ fontSize:11, padding:"3px 9px", borderRadius:20, background:"rgba(251,191,36,0.1)", color:"#fbbf24", border:"1px solid rgba(251,191,36,0.25)" }}>
               {pendingCount} pending
             </span>
           )}
-          <span style={{ fontSize:11, padding:"3px 10px", borderRadius:20, border:"1px solid var(--border-soft)", color:"var(--muted)" }}>
-            {isOnline ? (backendOk ? "local" : "web") : "offline"}
+          <span className="status-pill" style={{
+            background:  isOnline ? "var(--green-bg)" : "var(--red-bg)",
+            color:       isOnline ? "var(--green)"    : "var(--red)",
+            borderColor: isOnline ? "rgba(74,222,128,0.25)" : "rgba(248,113,113,0.25)",
+          }}>
+            ● {isOnline ? (backendOk ? "local" : "web") : "offline"}
           </span>
           {webMode && (
-            <button onClick={() => setShowKey(v => !v)} style={{ fontSize:12, padding:"4px 10px", borderRadius:6, border:"1px solid var(--border-soft)", background:"var(--surface)", cursor:"pointer", color:"var(--text-dim)" }}>
-              {apiKey ? "key set" : "API key"}
+            <button onClick={() => setShowKey(v => !v)} style={{ fontSize:12, padding:"5px 10px", borderRadius:7, border:"1px solid var(--border)", background:"var(--surface)", cursor:"pointer", color:"var(--text-dim)" }}>
+              {apiKey ? "🔑 key set" : "🔑 API key"}
             </button>
           )}
-          <input
-            type="color"
-            title="Accent color"
-            value={accentHex || "#111111"}
-            onChange={e => {
-              const hex = e.target.value;
-              setAccentHex(hex);
-              localStorage.setItem("unsent_accent", hex);
-              applyAccent(hex);
-            }}
-            style={{ width:28, height:28, padding:2, border:"1px solid var(--border-soft)", borderRadius:6, cursor:"pointer", background:"var(--surface)" }}
-          />
         </div>
-      </div>
+      </header>
 
-      {/* API key input (web mode) */}
-      {webMode && showKey && (
-        <div style={{ marginBottom:"1.5rem", padding:"12px 16px", background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8 }}>
-          <label style={{ fontSize:11, color:"var(--muted)", display:"block", marginBottom:6 }}>Groq API Key — stored in this browser only, never sent anywhere else</label>
-          <input type="password" value={apiKey}
-            onChange={e => { setApiKey(e.target.value); localStorage.setItem("unsent_groq_key", e.target.value); }}
-            placeholder="gsk_…"
-            style={{ width:"100%", padding:"8px 10px", fontSize:13, border:"1px solid var(--border)", borderRadius:6, fontFamily:"monospace", background:"var(--bg)", color:"var(--text)", boxSizing:"border-box" }}
-          />
-        </div>
-      )}
+      {/* ── Page ── */}
+      <div className="page">
 
-      {/* Tabs */}
-      <div style={{ display:"flex", borderBottom:"1px solid var(--border-soft)", marginBottom:"1.75rem", gap:2 }}>
-        {[["write","Write"],["timeline","Timeline"]].map(([id, label]) => (
-          <button key={id} onClick={() => setTab(id)} style={s.tab(id)}>{label}</button>
-        ))}
-      </div>
+        {webMode && showKey && (
+          <div className="api-key-panel">
+            <label>Groq API Key — stored in this browser only</label>
+            <input type="password" value={apiKey}
+              onChange={e => { setApiKey(e.target.value); localStorage.setItem("unsent_groq_key", e.target.value); }}
+              placeholder="gsk_…"
+            />
+          </div>
+        )}
 
-      {/* ── WRITE ── */}
-      {tab === "write" && (
-        <div style={{ display:"flex", flexDirection:"column", gap:"1.25rem" }}>
-
-          {/* Recipient */}
+        {/* ── WRITE ── */}
+        {tab === "write" && (
           <div>
-            <div style={{ fontSize:11, textTransform:"uppercase", letterSpacing:"0.08em", color:"var(--muted)", marginBottom:8 }}>This message is for</div>
-            <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+            <h2 className="write-heading">Write what you couldn't say.</h2>
+
+            <div className="recipient-label">This message is for</div>
+            <div className="recipient-tabs">
               {RECIPIENTS.map(r => (
-                <button key={r.key} onClick={() => setRecipient(r.key)} style={{
-                  padding:"8px 18px", fontSize:13, borderRadius:10, border:"1px solid", cursor:"pointer",
-                  background:   recipient === r.key ? "var(--seal)"        : "none",
-                  color:        recipient === r.key ? "var(--on-accent)"          : "var(--muted)",
-                  borderColor:  recipient === r.key ? "var(--seal)"        : "var(--border-soft)",
-                }}>
+                <button key={r.key} className={`recipient-tab ${recipient===r.key?"active":""}`} onClick={() => setRecipient(r.key)}>
                   {r.label}
                 </button>
               ))}
             </div>
+
             {recipient !== "self" && (
-              <input
-                value={recipLabel}
+              <input className="recipient-input" value={recipLabel}
                 onChange={e => setRecipLabel(e.target.value)}
                 placeholder={recipient === "person" ? "their name (optional)" : "describe the moment (optional)"}
-                style={{ marginTop:8, width:"100%", padding:"8px 12px", fontSize:13, background:"var(--surface-2)", border:"1px solid var(--border-soft)", borderRadius:6, color:"var(--text)", boxSizing:"border-box" }}
               />
             )}
-          </div>
 
-          {/* Message body */}
-          <textarea
-            value={body}
-            onChange={e => setBody(e.target.value)}
-            placeholder="Write what you couldn't say…"
-            rows={9}
-            style={{ width:"100%", padding:"18px", fontSize:15, lineHeight:1.9, border:"1px solid var(--border-soft)", borderRadius:16, fontFamily:"'Lora', Georgia, serif", color:"var(--text)", background:"var(--surface)", resize:"vertical", boxSizing:"border-box" }}
-          />
+            <textarea className="journal-textarea" value={body} onChange={e => setBody(e.target.value)}
+              placeholder="Start writing…"
+              rows={10}
+            />
 
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-            <span style={{ fontSize:12, color:"var(--muted)" }}>{body.trim().split(/\s+/).filter(Boolean).length} words</span>
-            <button onClick={submit} disabled={!canSubmit} style={{
-              padding:"10px 24px", fontSize:13, fontWeight:500, borderRadius:10, border:"1px solid", cursor: canSubmit ? "pointer" : "not-allowed",
-              background:  canSubmit ? "var(--seal)"   : "none",
-              color:       canSubmit ? "var(--on-accent)"     : "var(--muted)",
-              borderColor: canSubmit ? "var(--seal)"   : "var(--border-soft)",
-              display:"flex", alignItems:"center", gap:8,
-            }}>
-              {loading ? <><Spinner/> Saving…</> : "Keep this"}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── TIMELINE ── */}
-      {tab === "timeline" && (
-        <div>
-          {/* Filters */}
-          <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:"1.25rem", alignItems:"center" }}>
-            {/* Resolved filter */}
-            {[["open","open"],["resolved","sealed"],["all","all"]].map(([val, label]) => (
-              <button key={val} onClick={() => setFilterResolved(val)} style={s.filterBtn(filterResolved === val)}>
-                {label}
+            <div className="write-footer">
+              <span className="word-count">{body.trim().split(/\s+/).filter(Boolean).length} words</span>
+              <button className="submit-btn" onClick={submit} disabled={!canSubmit}>
+                {loading ? <><Spinner/> Saving…</> : "Keep this"}
               </button>
-            ))}
-
-            <div style={{ flex:1 }}/>
-
-            {/* Emotion filter */}
-            <select value={filterEmotion} onChange={e => setFilterEmotion(e.target.value)} style={s.select}>
-              <option value="">all emotions</option>
-              {usedEmotions.map(em => <option key={em} value={em}>{em}</option>)}
-            </select>
-
-            {/* Recipient filter */}
-            <select value={filterRecipient} onChange={e => setFilterRecipient(e.target.value)} style={s.select}>
-              <option value="">all recipients</option>
-              {RECIPIENTS.map(r => <option key={r.key} value={r.key}>{r.label}</option>)}
-            </select>
+            </div>
           </div>
+        )}
 
-          {filtered.length === 0 ? (
-            <p style={{ color:"var(--muted)", fontSize:14, fontStyle:"italic" }}>
-              {messages.length === 0 ? "Nothing here yet." : "No messages match these filters."}
-            </p>
-          ) : (
-            filtered.map(m => (
-              <MessageCard
-                key={m.id}
-                message={m}
-                onDelete={deleteMessage}
-                onResolved={markResolved}
-              />
-            ))
-          )}
-        </div>
-      )}
+        {/* ── TIMELINE ── */}
+        {tab === "timeline" && (
+          <div>
+            <div className="filters">
+              {[["open","open"],["resolved","sealed"],["all","all"]].map(([val, label]) => (
+                <button key={val} className={`filter-btn ${filterResolved===val?"active":""}`} onClick={() => setFilterResolved(val)}>
+                  {label}
+                </button>
+              ))}
+              <div style={{ flex:1 }}/>
+              <select className="filter-select" value={filterEmotion} onChange={e => setFilterEmotion(e.target.value)}>
+                <option value="">all emotions</option>
+                {usedEmotions.map(em => <option key={em} value={em}>{em}</option>)}
+              </select>
+              <select className="filter-select" value={filterRecipient} onChange={e => setFilterRecipient(e.target.value)}>
+                <option value="">all recipients</option>
+                {RECIPIENTS.map(r => <option key={r.key} value={r.key}>{r.label}</option>)}
+              </select>
+            </div>
+
+            {filtered.length === 0
+              ? <p className="empty-state">{messages.length === 0 ? "Nothing here yet." : "No messages match these filters."}</p>
+              : filtered.map(m => (
+                  <MessageCard key={m.id} message={m} onDelete={deleteMessage} onResolved={markResolved}/>
+                ))
+            }
+          </div>
+        )}
+
+      </div>
 
       {toast && <Toast msg={toast} onDone={() => setToast(null)}/>}
-    </div>
+    </>
   );
 }
