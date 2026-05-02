@@ -51,10 +51,10 @@ button { transition: all 0.15s; }
   to   { opacity: 1; }
 }
 
-/* ── Root ── */
+
 #root { min-height: 100vh; display: flex; flex-direction: column; }
 
-/* ── Topbar ── */
+
 .topbar {
   position: sticky;
   top: 0;
@@ -121,7 +121,7 @@ button { transition: all 0.15s; }
   border: 1px solid;
 }
 
-/* ── Page ── */
+
 .page {
   flex: 1;
   max-width: 720px;
@@ -131,7 +131,7 @@ button { transition: all 0.15s; }
   animation: fadeUp 0.2s ease;
 }
 
-/* ── Write ── */
+
 .write-heading {
   font-family: 'Instrument Serif', Georgia, serif;
   font-size: 30px;
@@ -236,7 +236,7 @@ button { transition: all 0.15s; }
 .submit-btn:not(:disabled):hover { opacity: 0.88; box-shadow: 0 0 20px var(--accent-glow); }
 .submit-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-/* ── Timeline filters ── */
+
 .filters {
   display: flex;
   flex-wrap: wrap;
@@ -273,7 +273,7 @@ button { transition: all 0.15s; }
   cursor: pointer;
 }
 
-/* ── Message card ── */
+
 .message-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -346,7 +346,7 @@ button { transition: all 0.15s; }
 
 .delete-btn:hover { color: var(--red); opacity: 1; }
 
-/* ── Closure responses ── */
+
 .closure-responses {
   margin-top: 14px;
   border-top: 1px solid var(--border);
@@ -370,7 +370,7 @@ button { transition: all 0.15s; }
   white-space: pre-wrap;
 }
 
-/* ── API key panel ── */
+
 .api-key-panel {
   padding: 16px 18px;
   background: var(--surface);
@@ -397,7 +397,7 @@ button { transition: all 0.15s; }
   color: var(--text);
 }
 
-/* ── Toast ── */
+
 .toast {
   position: fixed;
   bottom: 28px;
@@ -415,7 +415,7 @@ button { transition: all 0.15s; }
   white-space: nowrap;
 }
 
-/* ── Empty state ── */
+
 .empty-state {
   text-align: center;
   padding: 4rem 0;
@@ -424,7 +424,7 @@ button { transition: all 0.15s; }
   font-style: italic;
 }
 
-/* ── Closure overlay ── */
+
 .closure-overlay {
   position: fixed;
   inset: 0;
@@ -521,7 +521,7 @@ button { transition: all 0.15s; }
 
 .closure-dot.done { background: var(--accent); }
 
-/* ── Responsive ── */
+
 @media (max-width: 600px) {
   .topbar { padding: 0 1rem; }
   .topbar-brand span { display: none; }

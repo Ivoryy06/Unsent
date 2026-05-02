@@ -1,10 +1,10 @@
-// Unsent — write messages you'll never send.
-// Hold the feeling until you're ready to let go.
-// Stack: React + Vite, Flask backend, SQLite, offline-first (IndexedDB cache).
+
+
+
 
 import { useState, useEffect, useCallback, useRef } from "react";
 
-// ── Config ────────────────────────────────────────────────────────────────────
+
 
 const API_BASE    = import.meta.env.VITE_API_BASE ?? "";
 const IS_WEB_MODE = !API_BASE || import.meta.env.VITE_WEB_MODE === "true";
@@ -26,7 +26,7 @@ const RECIPIENTS = [
   { key: "self",    label: "myself"   },
 ];
 
-// Closure prompts — quiet, not clinical. User-initiated only.
+
 const CLOSURE_PROMPTS = [
   "Why did this go unsent?",
   "What did you most hope they — or you — would understand?",
@@ -35,7 +35,7 @@ const CLOSURE_PROMPTS = [
   "Is there anything you'd want to say now, just for yourself?",
 ];
 
-// ── Color theme ──────────────────────────────────────────────────────────────
+
 
 function hexToRgb(hex) {
   const n = parseInt(hex.replace("#", ""), 16);
@@ -66,7 +66,7 @@ function applyAccent(hex) {
   r.style.setProperty("--resolved-text",mix(hex, 0.35));
 }
 
-// ── IndexedDB (offline cache) ─────────────────────────────────────────────────
+
 
 const IDB_NAME  = "unsent_offline";
 const IDB_STORE = "pending_messages";
@@ -108,7 +108,7 @@ async function idbClear() {
   });
 }
 
-// ── Groq (web mode — emotion tagging only) ───────────────────────────────────
+
 
 async function tagEmotion(apiKey, body) {
   const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -126,7 +126,7 @@ async function tagEmotion(apiKey, body) {
   return EMOTIONS.includes(e) ? e : "neutral";
 }
 
-// ── localStorage helpers ──────────────────────────────────────────────────────
+
 
 function lsGet(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
@@ -134,7 +134,7 @@ function lsGet(key, fallback) {
 }
 function lsSet(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
-// ── Tiny shared components ────────────────────────────────────────────────────
+
 
 const Spinner = () => (
   <span style={{ display:"inline-block", width:14, height:14, border:"2px solid rgba(13,13,15,0.3)", borderTopColor:"#0d0d0f", borderRadius:"50%", animation:"spin 0.7s linear infinite", verticalAlign:"middle" }}/>
@@ -149,7 +149,7 @@ const Toast = ({ msg, onDone }) => {
   return <div className="toast">{msg}</div>;
 };
 
-// ── Closure Mode ──────────────────────────────────────────────────────────────
+
 
 function ClosureMode({ message, onComplete, onCancel }) {
   const [step,      setStep]      = useState(0);
@@ -239,7 +239,7 @@ function ClosureMode({ message, onComplete, onCancel }) {
   return null;
 }
 
-// ── Message Card ──────────────────────────────────────────────────────────────
+
 
 function MessageCard({ message, onDelete, onResolved }) {
   const [expanded,       setExpanded]       = useState(false);
@@ -324,7 +324,7 @@ function MessageCard({ message, onDelete, onResolved }) {
   );
 }
 
-// ── Main App ──────────────────────────────────────────────────────────────────
+
 
 export default function App() {
   const [tab,          setTab]          = useState("write");
@@ -343,12 +343,12 @@ export default function App() {
   const [backendOk,    setBackendOk]    = useState(null);
   const [pendingCount, setPendingCount] = useState(0);
 
-  // Filters for the timeline
+  
   const [filterEmotion,   setFilterEmotion]   = useState("");
   const [filterRecipient, setFilterRecipient] = useState("");
-  const [filterResolved,  setFilterResolved]  = useState("open"); // "open" | "resolved" | "all"
+  const [filterResolved,  setFilterResolved]  = useState("open"); 
 
-  // ── online/offline ──
+  
   useEffect(() => {
     const on  = () => setIsOnline(true);
     const off = () => setIsOnline(false);
@@ -357,7 +357,7 @@ export default function App() {
     return () => { window.removeEventListener("online", on); window.removeEventListener("offline", off); };
   }, []);
 
-  // ── backend health ──
+  
   useEffect(() => {
     if (IS_WEB_MODE) { setBackendOk(false); return; }
     fetch(`${API_BASE}/api/health`)
@@ -366,7 +366,7 @@ export default function App() {
       .catch(() => setBackendOk(false));
   }, []);
 
-  // ── load messages from backend ──
+  
   useEffect(() => {
     if (!backendOk) return;
     fetch(`${API_BASE}/api/messages`)
@@ -375,12 +375,12 @@ export default function App() {
       .catch(() => {});
   }, [backendOk]);
 
-  // ── pending offline count ──
+  
   useEffect(() => {
     idbGetAll().then(items => setPendingCount(items.length)).catch(() => {});
   }, []);
 
-  // ── sync offline cache when back online ──
+  
   useEffect(() => {
     if (!isOnline || !backendOk) return;
     idbGetAll().then(async items => {
@@ -399,7 +399,7 @@ export default function App() {
     }).catch(() => {});
   }, [isOnline, backendOk]);
 
-  // ── submit message ──
+  
   const submit = useCallback(async () => {
     if (!body.trim()) return;
     setLoading(true);
@@ -442,7 +442,7 @@ export default function App() {
     }
   }, [body, recipient, recipLabel, messages, backendOk, isOnline, apiKey]);
 
-  // ── delete ──
+  
   const deleteMessage = useCallback(async (id) => {
     if (backendOk) {
       await fetch(`${API_BASE}/api/messages/${id}`, { method: "DELETE" }).catch(() => {});
@@ -452,14 +452,14 @@ export default function App() {
     lsSet("unsent_messages", updated);
   }, [messages, backendOk]);
 
-  // ── mark resolved (after closure) ──
+  
   const markResolved = useCallback((id) => {
     const updated = messages.map(m => m.id === id ? { ...m, resolved: 1, resolved_at: Date.now() / 1000 } : m);
     setMessages(updated);
     lsSet("unsent_messages", updated);
   }, [messages]);
 
-  // ── filtered timeline ──
+  
   const filtered = messages.filter(m => {
     if (filterResolved === "open"     && m.resolved)  return false;
     if (filterResolved === "resolved" && !m.resolved) return false;
@@ -491,7 +491,7 @@ export default function App() {
 
   return (
     <>
-      {/* ── Topbar ── */}
+      {}
       <header className="topbar">
         <div className="topbar-brand">
           <h1>Unsent</h1>
@@ -573,7 +573,7 @@ export default function App() {
           </div>
         )}
 
-        {/* ── TIMELINE ── */}
+        {}
         {tab === "timeline" && (
           <div>
             <div className="filters">
